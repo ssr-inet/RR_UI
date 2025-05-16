@@ -104,17 +104,7 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        {user.role === "ADMIN" && (
-          <Card className="mt-6 p-6 shadow-sm">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Admin Actions</h2>
-              <div className="flex flex-wrap gap-4">
-                <Button onClick={() => router.push("/auth/register")}>Register New User</Button>
-                {/* Add more admin actions here */}
-              </div>
-            </div>
-          </Card>
-        )}
+
       </div>
     </div>
   );

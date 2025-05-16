@@ -9,6 +9,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { DynamicHero } from "@/components/DynamicHero";
 import { MarqueeTestimonials } from "@/components/MarqueeTestimonials";
 import Aos from "aos";
+import LoginPage from "./auth/login/page";
 
 export default function page() {
   useEffect(() => {
@@ -19,12 +20,7 @@ export default function page() {
   }, []);
   return (
     <div className="flex flex-col container gap-[40px] overflow-x-auto items-center justify-start mx-auto">
-      <Navbar></Navbar>
-      <DynamicHero></DynamicHero>
-      {/* <HeroSection></HeroSection> */}
-      <MarqueeTestimonials className=""></MarqueeTestimonials>
-      <PartnersMarquee></PartnersMarquee>
-      <Footer></Footer>
+      <LoginPage></LoginPage>
     </div>
   );
 }

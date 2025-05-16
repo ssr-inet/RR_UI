@@ -190,7 +190,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\Inet\\Xenovex\\inet\\prisma\\generated\\client",
+      "value": "D:\\RR_UI\\prisma\\generated\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -204,7 +204,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\Inet\\Xenovex\\inet\\prisma\\schema.prisma",
+    "sourceFilePath": "D:\\RR_UI\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -218,12 +218,11 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "mysql://root@127.0.0.1:3306/rr_db"
       }
     }
   },

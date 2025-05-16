@@ -16,23 +16,15 @@ export default function InetSidebarContent() {
       icon: Home,
     },
     {
-      title: "MenuItems",
-      url: "/dashboard/menuItems",
+      title: "Filter Form",
+      url: "/dashboard/filterFormUpload",
       icon: Inbox,
     },
-    {
-      title: "Job Posting",
-      url: "/dashboard/jobPosting",
-      icon: Calendar,
-    },
+
   ];
 
   const userItems = [
-    {
-      title: "Search",
-      url: "/dashboard/search",
-      icon: Search,
-    },
+
     {
       title: "Settings",
       url: "/dashboard/settings",

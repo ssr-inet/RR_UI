@@ -101,6 +101,16 @@ const FilterForm = () => {
         setApiResponse(null);
     };
 
+    const normalizeResponse = (responseData: any) => {
+
+
+        try {
+            return typeof responseData === "string" ? JSON.parse(responseData) : responseData;
+        } catch (error) {
+            console.error(error)
+            return null
+        }
+    }
     const processData = async (values: FormValues) => {
         setIsSubmitting(true);
         setApiResponse(null); // Reset previous response
@@ -115,11 +125,18 @@ const FilterForm = () => {
             }
             formData.append("file", values.file);
 
-            const response = await axios.post("http://localhost:5000/api/dummydata", formData, {
+            const res = await axios.post("http://localhost:5000/api/dummydata", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
+
+            const response = {
+                ...res,
+                data: normalizeResponse(res.data)
+            }
+
+            console.log(response, "S!!", typeof (response.data));
 
             if (response.status === 200) {
                 toast.success("Data processed successfully!");

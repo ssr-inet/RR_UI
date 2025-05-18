@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import * as XLSX from 'xlsx';
 import { useState } from "react";
 import { LockIcon, X } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface DataItem {
     [key: string]: any;
@@ -31,6 +32,11 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
 
     const localData = responseData
     console.log('localData', localData);
+    if (!localData?.isSuccess && localData?.message) {
+        toast.error(localData?.message)
+        return
+
+    }
 
     if (!localData) {
 
@@ -47,6 +53,7 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
             </Card>
         );
     }
+    console.log(localData, "s11");
 
     if (localData?.error || !localData?.isSuccess) {
         return (
@@ -57,7 +64,7 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                 <CardContent>
                     <div className="text-center p-4">
 
-                        <p><span><X className="h-5 w-5 text-red-500" /></span>{localData?.error || 'Failed to Process the File'}</p>
+                        <p><span><X className="h-5 w-5 text-red-500" /></span>{localData?.error || 'ssss Failed to Process the File'}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -80,8 +87,9 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
         );
     }
 
-    const combinedData = localData.data.combined || [];
-    const otherSections = { ...localData.data, combined: undefined };
+    const combinedData = localData?.data?.combined || [];
+
+    const otherSections = { ...localData.data };
 
     const dataSections = [
         { key: "mismatched", label: "Mismatched Data" },
@@ -92,11 +100,12 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
         { key: "Vendor_failed_ihub_initiated", label: "Vendor Failed - IHub Initiated" },
         { key: "Tenant_db_ini_not_in_hubdb", label: "Tenant DB Init Not in HubDB" },
         { key: "vend_ihub_succes_not_in_ledger", label: "Vendor IHub Success Not in Ledger" },
+        { key: "not_in_vendor", label: "Not in Vendor Statement" },
     ];
 
     const activeSections = dataSections.filter(section => {
         const sectionData = otherSections[section.key];
-        console.log('sectionData', sectionData)
+        // console.log('sectionData', sectionData)
         return Array.isArray(sectionData) && sectionData.length > 0;
     });
 
@@ -112,15 +121,29 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
         if (value === null || value === undefined) return "N/A";
         return String(value);
     };
+    console.log(combinedData, "s1");
+
+    const [paginationState, setPaginationState] = useState<{ [key: string]: number }>({});
+    const [currentPage, setCurrentPage] = useState(1); // For combinedData pagination
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(combinedData.length / itemsPerPage);
+
+    const paginatedData = combinedData.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     return (
         <div className="space-y-6 w-full max-w-6xl">
-            {!isError &&
+            {!isError && (
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Combined Data</CardTitle>
                         {combinedData.length > 0 && (
-                            <Button onClick={() => exportToExcel(combinedData, 'combined_data')} variant="outline">
+                            <Button
+                                onClick={() => exportToExcel(combinedData, 'combined_data')}
+                                variant="outline"
+                            >
                                 Export to Excel
                             </Button>
                         )}
@@ -136,12 +159,12 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                     <TableHeader>
                                         <TableRow>
                                             {Object.keys(combinedData[0]).map((column) => (
-                                                <TableHead key={column}>{column.replace(/_/g, " ")}</TableHead>
+                                                <TableHead key={column}>{column.replace(/_/g, ' ')}</TableHead>
                                             ))}
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {combinedData.map((item: DataItem, index: number) => (
+                                        {paginatedData.map((item: DataItem, index: number) => (
                                             <TableRow key={index}>
                                                 {Object.keys(combinedData[0]).map((column) => (
                                                     <TableCell key={`${index}-${column}`}>
@@ -152,11 +175,35 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                         ))}
                                     </TableBody>
                                 </Table>
+
+                                <div className="flex justify-between items-center mt-4">
+                                    <p className="text-sm text-gray-600">
+                                        Page {currentPage} of {totalPages}
+                                    </p>
+                                    <div className="space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                            disabled={currentPage === 1}
+                                        >
+                                            Previous
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </CardContent>
-                </Card>}
-            {!isError &&
+                </Card>
+            )}
+
+            {!isError && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-center">Detailed Results</CardTitle>
@@ -181,13 +228,29 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                 {activeSections.map((section) => {
                                     const data = otherSections[section.key] || [];
                                     const columns = data.length > 0 ? Object.keys(data[0]) : [];
+                                    const currentPage = paginationState[section.key] || 1;
+                                    const totalPages = Math.ceil(data.length / itemsPerPage);
+                                    const paginatedData = data.slice(
+                                        (currentPage - 1) * itemsPerPage,
+                                        currentPage * itemsPerPage
+                                    );
+
+                                    const changePage = (newPage: number) => {
+                                        setPaginationState((prev) => ({
+                                            ...prev,
+                                            [section.key]: newPage,
+                                        }));
+                                    };
 
                                     return (
                                         <TabsContent key={section.key} value={section.key} className="pt-4">
                                             <Card>
                                                 <CardHeader className="flex flex-row items-center justify-between">
                                                     <CardTitle>{section.label}</CardTitle>
-                                                    <Button onClick={() => exportToExcel(data, section.key)} variant="outline">
+                                                    <Button
+                                                        onClick={() => exportToExcel(data, section.key)}
+                                                        variant="outline"
+                                                    >
                                                         Export to Excel
                                                     </Button>
                                                 </CardHeader>
@@ -197,12 +260,14 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                                             <TableHeader>
                                                                 <TableRow>
                                                                     {columns.map((column) => (
-                                                                        <TableHead key={column}>{column.replace(/_/g, " ")}</TableHead>
+                                                                        <TableHead key={column}>
+                                                                            {column.replace(/_/g, ' ')}
+                                                                        </TableHead>
                                                                     ))}
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
-                                                                {data.map((item: DataItem, index: number) => (
+                                                                {paginatedData.map((item: DataItem, index: number) => (
                                                                     <TableRow key={index}>
                                                                         {columns.map((column) => (
                                                                             <TableCell key={`${index}-${column}`}>
@@ -213,6 +278,32 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                                                 ))}
                                                             </TableBody>
                                                         </Table>
+
+                                                        {totalPages > 1 && (
+                                                            <div className="flex justify-between items-center mt-4">
+                                                                <p className="text-sm text-gray-600">
+                                                                    Page {currentPage} of {totalPages}
+                                                                </p>
+                                                                <div className="space-x-2">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        onClick={() => changePage(Math.max(currentPage - 1, 1))}
+                                                                        disabled={currentPage === 1}
+                                                                    >
+                                                                        Previous
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        onClick={() =>
+                                                                            changePage(Math.min(currentPage + 1, totalPages))
+                                                                        }
+                                                                        disabled={currentPage === totalPages}
+                                                                    >
+                                                                        Next
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </CardContent>
                                             </Card>
@@ -223,13 +314,16 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                         )}
                     </CardContent>
                 </Card>
-            }
-            {isError &&
+            )}
+
+            {isError && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-center">Detailed Results</CardTitle>
                     </CardHeader>
-                </Card>}
+                </Card>
+            )}
         </div>
+
     );
 };

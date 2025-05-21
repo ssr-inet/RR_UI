@@ -103,18 +103,17 @@ const FilterForm = () => {
     };
 
     const normalizeResponse = (responseData: any) => {
-
-
         try {
             return typeof responseData === "string" ? JSON.parse(responseData) : responseData;
         } catch (error) {
-            console.error(error)
-            return null
+            console.error(error);
+            return null;
         }
-    }
+    };
+
     const processData = async (values: FormValues) => {
         setIsSubmitting(true);
-        setApiResponse(null); // Reset previous response
+        setApiResponse(null);
 
         try {
             const formData = new FormData();
@@ -126,43 +125,95 @@ const FilterForm = () => {
             }
             formData.append("file", values.file);
 
+            console.log("Before axios request");
+
+            // Remove the .catch() here and let the try/catch handle it
             const res = await axios.post("http://localhost:5000/api/dummydata", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
+                timeout: 10000,
             });
+
+            console.log("After axios request", res);
 
             const response = {
                 ...res,
                 data: normalizeResponse(res.data)
-            }
-
-            console.log(response, "S!!", typeof (response.data));
+            };
 
             if (response.status === 200) {
-                toast.success("Data processed successfully!");
-                setApiResponse(response.data);
+                if (response.data?.isSuccess) {
+                    toast.success("Data processed successfully!");
+                    setApiResponse(response.data);
+                } else {
+                    const errorMessage = "Error processing file";
+                    toast.error(errorMessage, { duration: 5000 });
+                    setApiResponse(null);
+                }
             } else if (response.status === 202) {
-                toast.warning(response.data.message);
+                toast.warning(response.data?.message || "Processing warning", { duration: 5000 });
+                setApiResponse(null);
             } else {
-                throw new Error("Unexpected response from server");
+                throw new Error(`Unexpected status code: ${response.status}`);
             }
-        } catch (error) {
-            console.error("Error:", error);
-            if (axios.isAxiosError(error)) {
-                const errorMessage = error.response?.data?.message || "Error processing file";
-                toast.error(errorMessage);
-                setApiResponse({ error: errorMessage });
-            } else {
-                const errorMessage = error instanceof Error ? error.message : "Something went wrong!";
-                toast.error(errorMessage);
-                setApiResponse({ error: errorMessage });
+        } catch (error: unknown) {
+            console.error("API Error:", error);
+
+            // First check if it's our custom SERVER_UNREACHABLE error
+            if (error instanceof Error && error.message === "SERVER_UNREACHABLE") {
+                toast.error("Server is not reachable. Please check your network connection and try again.", {
+                    duration: 10000,
+                    position: 'top-center',
+                    style: {
+                        background: '#ffebee',
+                        color: '#b71c1c',
+                        fontWeight: 'bold',
+                    }
+                });
             }
+            // Then check for Axios errors
+            else if (axios.isAxiosError(error)) {
+                console.log("Axios error details:", {
+                    code: error.code,
+                    message: error.message,
+                    response: error.response,
+                    request: error.request
+                });
+
+                if (error.code === "ERR_NETWORK") {
+                    toast.error("Network Error: Could not connect to server..!", {
+                        duration: 15000,
+                        position: 'top-center'
+                    });
+                }
+                else if (error.code === "ECONNABORTED") {
+                    toast.error("Request timed out. Server is taking too long to respond.", {
+                        duration: 10000
+                    });
+                }
+                else if (error.response) {
+                    // Server responded with error status
+                    toast.error(`Server error (${error.response.status}): ${error.response.data?.message || 'No error message'}`);
+                }
+                else {
+                    toast.error("Network request failed: " + error.message);
+                }
+            }
+            // Handle other types of errors
+            else if (error instanceof Error) {
+                toast.error(error.message);
+            }
+            // Final fallback
+            else {
+                toast.error("An unknown error occurred");
+            }
+
+            setApiResponse(null);
         } finally {
             setIsSubmitting(false);
         }
     };
-
     return (
         <div className="flex flex-col items-center min-h-screen p-4">
             <Card className="w-full max-w-lg mb-8">
@@ -243,7 +294,7 @@ const FilterForm = () => {
                             </div>
 
                             {/* Transaction Type (only visible for Aeps) */}
-                            {selectedService === "Aeps" && (
+                            {selectedService === "AEPS" && (
                                 <FormField
                                     control={form.control}
                                     name="transactionType"
@@ -318,8 +369,8 @@ const FilterForm = () => {
                 </CardContent>
             </Card>
 
-            {/* Results Section */}
-            {apiResponse && (
+            {/* Results Section - Only show if apiResponse exists and isSuccess is true */}
+            {apiResponse?.isSuccess && (
                 <ResultsViewer responseData={apiResponse} />
             )}
         </div>

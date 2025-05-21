@@ -8,7 +8,7 @@ import localFont from "next/font/local";
 import { Globe } from "@/components/magicui/globe";
 import PageTransition from "@/components/PageTransition";
 import PageTransitionWrapper from "@/components/PageTransitionWrapper";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -126,7 +126,7 @@ export default function RootLayout({
             <section className="w-full  ">{children}</section>
           </main>
         </ThemeProvider>
-        <Toaster />
+        <Toaster position="top-center" richColors /> {/* ✅ sonner Toaster */}
 
         {/* </PageTransition> */}
         {/* </PageTransitionWrapper> */}

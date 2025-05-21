@@ -30,43 +30,26 @@ interface ResultsViewerProps {
 }
 
 export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
-    const [isError, setIsError] = useState(false)
 
     const localData = responseData
     console.log('localData', localData);
 
-    // const checkErr = () => {
-    //     if (!localData?.isSuccess && localData?.message) {
+    // if (!localData) {
 
-    //         return
-    //     }
+    //     return (
+    //         <Card className="w-full max-w-6xl">
+    //             <CardHeader>
+    //                 <CardTitle className="text-center">No Data Available</CardTitle>
+    //             </CardHeader>
+    //             <CardContent>
+    //                 <div className="text-center p-4">
+    //                     <p>No response data received from the server.</p>
+    //                 </div>
+    //             </CardContent>
+    //         </Card>
+    //     );
     // }
-    useEffect(() => {
-        setIsError(!localData?.isSuccess)
-    }, [localData?.isSuccess])
-
-
-    useEffect(() => {
-        if (isError) {
-            toast.error(localData?.message)
-        }
-    }, [isError])
-    if (!localData) {
-
-        return (
-            <Card className="w-full max-w-6xl">
-                <CardHeader>
-                    <CardTitle className="text-center">No Data Available</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-center p-4">
-                        <p>No response data received from the server.</p>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-    console.log(localData, "s11");
+    // console.log(localData, "s11");
 
     // if (localData?.error || !localData?.isSuccess) {
     //     return (
@@ -85,15 +68,15 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
     // }
 
 
-    if (!localData?.data || Object.keys(localData?.data).length === 0) {
-        return (
-            <Card className="w-full max-w-6xl">
-                <CardHeader>
-                    <CardTitle className="text-center">No Data Available</CardTitle>
-                </CardHeader>
-            </Card>
-        );
-    }
+    // if (!localData?.data || Object.keys(localData?.data).length === 0) {
+    //     return (
+    //         <Card className="w-full max-w-6xl">
+    //             <CardHeader>
+    //                 <CardTitle className="text-center">No Data Available</CardTitle>
+    //             </CardHeader>
+    //         </Card>
+    //     );
+    // }
 
     const combinedData = localData?.data?.combined || [];
     const Total_success_count = localData?.data?.Total_Success_count || [];
@@ -161,23 +144,22 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
 
     return (
         <div className="space-y-6 w-full max-w-6xl">
-            {!isError && (
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Grand Total: {Total_success_count + Total_failed_count + combinedData.length}</CardTitle><br />
-                        <CardTitle>Total Success : {Total_success_count}</CardTitle><br />
-                        <CardTitle>Total Failed : {Total_failed_count}</CardTitle><br />
-                        <CardTitle>Combined Data count: {combinedData.length}</CardTitle>
-                        {combinedData.length > 0 && (
-                            <Button
-                                onClick={() => exportToExcel(combinedData, 'combined_data')}
-                                variant="outline"
-                            >
-                                Export Combined Data to Excel
-                            </Button>
-                        )}
-                    </CardHeader>
-                    {/* <CardContent>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Grand Total: {Total_success_count + Total_failed_count + combinedData.length}</CardTitle><br />
+                    <CardTitle>Total Success : {Total_success_count}</CardTitle><br />
+                    <CardTitle>Total Failed : {Total_failed_count}</CardTitle><br />
+                    <CardTitle>Combined Data count: {combinedData.length}</CardTitle>
+                    {combinedData.length > 0 && (
+                        <Button
+                            onClick={() => exportToExcel(combinedData, 'combined_data')}
+                            variant="outline"
+                        >
+                            Export Combined Data to Excel
+                        </Button>
+                    )}
+                </CardHeader>
+                {/* <CardContent>
                         {combinedData.length === 0 ? (
                             <div className="text-center p-4">
                                 <p>No combined data available</p>
@@ -229,125 +211,113 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
                             </div>
                         )}
                     </CardContent> */}
-                </Card>
-            )}
-
-            {!isError && (
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-center">Detailed Results</CardTitle>
-                        {activeSections.length > 0 && (
-                            <Button onClick={exportAllTabsToExcel} variant="outline">
-                                Export All Tabs
-                            </Button>
-                        )}
-                    </CardHeader>
-                    <CardContent>
-                        {activeSections.length === 0 ? (
-                            <div className="text-center p-4">
-                                <p>No detailed data available in any category.</p>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="text-center">Detailed Results</CardTitle>
+                    {activeSections.length > 0 && (
+                        <Button onClick={exportAllTabsToExcel} variant="outline">
+                            Export All Tabs
+                        </Button>
+                    )}
+                </CardHeader>
+                <CardContent>
+                    {activeSections.length === 0 ? (
+                        <div className="text-center p-4">
+                            <p>No detailed data available in any category.</p>
+                        </div>
+                    ) : (
+                        <Tabs defaultValue={activeSections[0]?.key || ''} className="w-full">
+                            <div className="overflow-x-auto pb-2">
+                                <TabsList className="flex w-full justify-start">
+                                    {activeSections.map((section) => (
+                                        <TabsTrigger key={section.key} value={section.key}>
+                                            {section.label}
+                                        </TabsTrigger>
+                                    ))}
+                                </TabsList>
                             </div>
-                        ) : (
-                            <Tabs defaultValue={activeSections[0]?.key || ''} className="w-full">
-                                <div className="overflow-x-auto pb-2">
-                                    <TabsList className="flex w-full justify-start">
-                                        {activeSections.map((section) => (
-                                            <TabsTrigger key={section.key} value={section.key}>
-                                                {section.label}
-                                            </TabsTrigger>
-                                        ))}
-                                    </TabsList>
-                                </div>
 
-                                {activeSections.map((section) => {
-                                    const data = otherSections[section.key] || [];
-                                    const columns = data.length > 0 ? Object.keys(data[0]) : [];
-                                    const currentPage = paginationState[section.key] || 1;
-                                    const totalPages = Math.ceil(data.length / itemsPerPage);
-                                    const paginatedData = data.slice(
-                                        (currentPage - 1) * itemsPerPage,
-                                        currentPage * itemsPerPage
-                                    );
+                            {activeSections.map((section) => {
+                                const data = otherSections[section.key] || [];
+                                const columns = data.length > 0 ? Object.keys(data[0]) : [];
+                                const currentPage = paginationState[section.key] || 1;
+                                const totalPages = Math.ceil(data.length / itemsPerPage);
+                                const paginatedData = data.slice(
+                                    (currentPage - 1) * itemsPerPage,
+                                    currentPage * itemsPerPage
+                                );
 
-                                    const changePage = (newPage: number) => {
-                                        setPaginationState((prev) => ({
-                                            ...prev,
-                                            [section.key]: newPage,
-                                        }));
-                                    };
-                                    return (
-                                        <TabsContent key={section.key} value={section.key} className="pt-4">
-                                            <Card>
-                                                <CardHeader className="flex flex-row items-center justify-between">
-                                                    <CardTitle>{section.label}</CardTitle>
-                                                    <span>Total count: {data.length}</span>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <div className="overflow-x-auto">
-                                                        <Table>
-                                                            <TableHeader>
-                                                                <TableRow>
+                                const changePage = (newPage: number) => {
+                                    setPaginationState((prev) => ({
+                                        ...prev,
+                                        [section.key]: newPage,
+                                    }));
+                                };
+                                return (
+                                    <TabsContent key={section.key} value={section.key} className="pt-4">
+                                        <Card>
+                                            <CardHeader className="flex flex-row items-center justify-between">
+                                                <CardTitle>{section.label}</CardTitle>
+                                                <span>Total count: {data.length}</span>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="overflow-x-auto">
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableRow>
+                                                                {columns.map((column) => (
+                                                                    <TableHead key={column}>{column.replace(/_/g, ' ')}</TableHead>
+                                                                ))}
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {paginatedData.map((item: DataItem, index: number) => (
+                                                                <TableRow key={index}>
                                                                     {columns.map((column) => (
-                                                                        <TableHead key={column}>{column.replace(/_/g, ' ')}</TableHead>
+                                                                        <TableCell key={`${index}-${column}`}>
+                                                                            {formatValue(item[column])}
+                                                                        </TableCell>
                                                                     ))}
                                                                 </TableRow>
-                                                            </TableHeader>
-                                                            <TableBody>
-                                                                {paginatedData.map((item: DataItem, index: number) => (
-                                                                    <TableRow key={index}>
-                                                                        {columns.map((column) => (
-                                                                            <TableCell key={`${index}-${column}`}>
-                                                                                {formatValue(item[column])}
-                                                                            </TableCell>
-                                                                        ))}
-                                                                    </TableRow>
-                                                                ))}
-                                                            </TableBody>
-                                                        </Table>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
 
-                                                        {totalPages > 1 && (
-                                                            <div className="flex justify-between items-center mt-4">
-                                                                <p className="text-sm text-gray-600">
-                                                                    Page {currentPage} of {totalPages}
-                                                                </p>
-                                                                <div className="space-x-2">
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        onClick={() => changePage(Math.max(currentPage - 1, 1))}
-                                                                        disabled={currentPage === 1}
-                                                                    >
-                                                                        Previous
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
-                                                                        disabled={currentPage === totalPages}
-                                                                    >
-                                                                        Next
-                                                                    </Button>
-                                                                </div>
+                                                    {totalPages > 1 && (
+                                                        <div className="flex justify-between items-center mt-4">
+                                                            <p className="text-sm text-gray-600">
+                                                                Page {currentPage} of {totalPages}
+                                                            </p>
+                                                            <div className="space-x-2">
+                                                                <Button
+                                                                    variant="outline"
+                                                                    onClick={() => changePage(Math.max(currentPage - 1, 1))}
+                                                                    disabled={currentPage === 1}
+                                                                >
+                                                                    Previous
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+                                                                    disabled={currentPage === totalPages}
+                                                                >
+                                                                    Next
+                                                                </Button>
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </TabsContent>
-                                    );
-                                })}
-                            </Tabs>
-                        )}
-                    </CardContent>
-                </Card>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </TabsContent>
+                                );
+                            })}
+                        </Tabs>
+                    )}
+                </CardContent>
+            </Card>
 
-            )}
-
-            {/* {isError && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-center">Detailed Results</CardTitle>
-                    </CardHeader>
-                </Card>
-            )} */}
         </div>
 
     );

@@ -43,18 +43,22 @@
   --radius-xl: calc(var(--radius) + 4px);
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
   @keyframes marquee {
     from {
       transform: translateX(0);
     }
+
     to {
       transform: translateX(calc(-100% - var(--gap)));
     }
   }
+
   @keyframes marquee-vertical {
     from {
       transform: translateY(0);
     }
+
     to {
       transform: translateY(calc(-100% - var(--gap)));
     }
@@ -69,9 +73,11 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.639 0.181 237.7); /* #1fa1da */
+  --primary: oklch(0.639 0.181 237.7);
+  /* #1fa1da */
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.265 0.102 265); /* #092f6a */
+  --secondary: oklch(0.265 0.102 265);
+  /* #092f6a */
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -103,9 +109,11 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.639 0.181 237.7); /* #1fa1da */
+  --primary: oklch(0.639 0.181 237.7);
+  /* #1fa1da */
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.265 0.102 265); /* #092f6a */
+  --secondary: oklch(0.265 0.102 265);
+  /* #092f6a */
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
@@ -134,6 +142,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -156,11 +165,13 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #3b82f6; /* Tailwind 'blue-500' (primary) */
+  background-color: #3b82f6;
+  /* Tailwind 'blue-500' (primary) */
   border-radius: 9999px;
   transition: background-color 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #2563eb; /* Tailwind 'blue-600' */
+  background-color: #2563eb;
+  /* Tailwind 'blue-600' */
 }

@@ -15,9 +15,11 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import * as XLSX from 'xlsx';
-import { useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { LockIcon, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { saveAs } from 'file-saver'; // also install this
+
 
 interface DataItem {
     [key: string]: any;
@@ -27,17 +29,28 @@ interface ResultsViewerProps {
     responseData: any;
 }
 
-export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
+export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
     const [isError, setIsError] = useState(false)
 
     const localData = responseData
     console.log('localData', localData);
-    if (!localData?.isSuccess && localData?.message) {
-        toast.error(localData?.message)
-        return
 
-    }
+    // const checkErr = () => {
+    //     if (!localData?.isSuccess && localData?.message) {
 
+    //         return
+    //     }
+    // }
+    useEffect(() => {
+        setIsError(!localData?.isSuccess)
+    }, [localData?.isSuccess])
+
+
+    useEffect(() => {
+        if (isError) {
+            toast.error(localData?.message)
+        }
+    }, [isError])
     if (!localData) {
 
         return (
@@ -55,21 +68,21 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
     }
     console.log(localData, "s11");
 
-    if (localData?.error || !localData?.isSuccess) {
-        return (
-            <Card className="w-full max-w-6xl">
-                <CardHeader>
-                    {/* <CardTitle className="text-center text-red-500">Failed to Process the File</CardTitle> */}
-                </CardHeader>
-                <CardContent>
-                    <div className="text-center p-4">
+    // if (localData?.error || !localData?.isSuccess) {
+    //     return (
+    //         <Card>
+    //             {/* <CardHeader> */}
+    //             {/* <CardTitle className="text-center text-red-500">Failed to Process the File</CardTitle> */}
+    //             {/* </CardHeader> */}
+    //             <CardContent>
+    //                 <div className="text-center p-4">
 
-                        <p><span><X className="h-5 w-5 text-red-500" /></span>{localData?.error || 'ssss Failed to Process the File'}</p>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
+    //                     <p className="flex justify-center gap-6"><X className="h-5 w-5 text-red-500" />{localData?.error || 'Failed to Process the File'}</p>
+    //                 </div>
+    //             </CardContent>
+    //         </Card>
+    //     );
+    // }
 
 
     if (!localData?.data || Object.keys(localData?.data).length === 0) {
@@ -78,29 +91,26 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                 <CardHeader>
                     <CardTitle className="text-center">No Data Available</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div className="text-center p-4">
-                        <p>The query returned no results for the selected criteria.</p>
-                    </div>
-                </CardContent>
             </Card>
         );
     }
 
     const combinedData = localData?.data?.combined || [];
+    const Total_success_count = localData?.data?.Total_Success_count || [];
+    const Total_failed_count = localData?.data?.Total_Failed_count || [];
 
     const otherSections = { ...localData.data };
 
     const dataSections = [
-        { key: "mismatched", label: "Mismatched Data" },
+        // { key: "mismatched", label: "Mismatched Data" },
         { key: "not_in_Portal", label: "Not in Portal" },
-        { key: "not_in_Portal_vendor_success", label: "Not in Portal (Vendor Success)" },
-        { key: "VENDOR_SUCCESS_IHUB_INPROGRESS", label: "Vendor Success - IHub In Progress" },
-        { key: "VENDOR_SUCCESS_IHUB_FAILED", label: "Vendor Success - IHub Failed" },
-        { key: "Vendor_failed_ihub_initiated", label: "Vendor Failed - IHub Initiated" },
-        { key: "Tenant_db_ini_not_in_hubdb", label: "Tenant DB Init Not in HubDB" },
-        { key: "vend_ihub_succes_not_in_ledger", label: "Vendor IHub Success Not in Ledger" },
-        { key: "not_in_vendor", label: "Not in Vendor Statement" },
+        { key: "not_in_Portal_vendor_success", label: "Not in Portal(Vendor Succ)" },
+        { key: "VENDOR_SUCCESS_IHUB_INPROGRESS", label: "Ven_Suc - IHub_Progress" },
+        { key: "VENDOR_SUCCESS_IHUB_FAILED", label: "Ven_Suc - IHub_Failed" },
+        { key: "Vendor_failed_ihub_initiated", label: "Ven_Failed - IHub_Initiated" },
+        { key: "Tenant_db_ini_not_in_hubdb", label: "Tenant_DB_Init - Not_in_HubDB" },
+        { key: "vend_ihub_succes_not_in_ledger", label: "Vend_IHub-Suc - Not in Ledger" },
+        { key: "not_in_vendor", label: "Not in Vendor xl" },
     ];
 
     const activeSections = dataSections.filter(section => {
@@ -132,23 +142,42 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
+    const exportAllTabsToExcel = () => {
+        const workbook = XLSX.utils.book_new();
+
+        activeSections.forEach((section) => {
+            const data = otherSections[section.key] || [];
+            if (data.length > 0) {
+                const worksheet = XLSX.utils.json_to_sheet(data);
+                XLSX.utils.book_append_sheet(workbook, worksheet, section.label || section.key);
+            }
+        });
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+        saveAs(blob, 'detailed_results.xlsx');
+    };
+
 
     return (
         <div className="space-y-6 w-full max-w-6xl">
             {!isError && (
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Combined Data</CardTitle>
+                        <CardTitle>Grand Total: {Total_success_count + Total_failed_count + combinedData.length}</CardTitle><br />
+                        <CardTitle>Total Success : {Total_success_count}</CardTitle><br />
+                        <CardTitle>Total Failed : {Total_failed_count}</CardTitle><br />
+                        <CardTitle>Combined Data count: {combinedData.length}</CardTitle>
                         {combinedData.length > 0 && (
                             <Button
                                 onClick={() => exportToExcel(combinedData, 'combined_data')}
                                 variant="outline"
                             >
-                                Export to Excel
+                                Export Combined Data to Excel
                             </Button>
                         )}
                     </CardHeader>
-                    <CardContent>
+                    {/* <CardContent>
                         {combinedData.length === 0 ? (
                             <div className="text-center p-4">
                                 <p>No combined data available</p>
@@ -199,14 +228,19 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                 </div>
                             </div>
                         )}
-                    </CardContent>
+                    </CardContent> */}
                 </Card>
             )}
 
             {!isError && (
                 <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-center">Detailed Results</CardTitle>
+                        {activeSections.length > 0 && (
+                            <Button onClick={exportAllTabsToExcel} variant="outline">
+                                Export All Tabs
+                            </Button>
+                        )}
                     </CardHeader>
                     <CardContent>
                         {activeSections.length === 0 ? (
@@ -241,18 +275,12 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                             [section.key]: newPage,
                                         }));
                                     };
-
                                     return (
                                         <TabsContent key={section.key} value={section.key} className="pt-4">
                                             <Card>
                                                 <CardHeader className="flex flex-row items-center justify-between">
                                                     <CardTitle>{section.label}</CardTitle>
-                                                    <Button
-                                                        onClick={() => exportToExcel(data, section.key)}
-                                                        variant="outline"
-                                                    >
-                                                        Export to Excel
-                                                    </Button>
+                                                    <span>Total count: {data.length}</span>
                                                 </CardHeader>
                                                 <CardContent>
                                                     <div className="overflow-x-auto">
@@ -260,9 +288,7 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                                             <TableHeader>
                                                                 <TableRow>
                                                                     {columns.map((column) => (
-                                                                        <TableHead key={column}>
-                                                                            {column.replace(/_/g, ' ')}
-                                                                        </TableHead>
+                                                                        <TableHead key={column}>{column.replace(/_/g, ' ')}</TableHead>
                                                                     ))}
                                                                 </TableRow>
                                                             </TableHeader>
@@ -294,9 +320,7 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                                                                     </Button>
                                                                     <Button
                                                                         variant="outline"
-                                                                        onClick={() =>
-                                                                            changePage(Math.min(currentPage + 1, totalPages))
-                                                                        }
+                                                                        onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
                                                                         disabled={currentPage === totalPages}
                                                                     >
                                                                         Next
@@ -314,16 +338,17 @@ export const ResultsViewer = ({ responseData }: ResultsViewerProps) => {
                         )}
                     </CardContent>
                 </Card>
+
             )}
 
-            {isError && (
+            {/* {isError && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-center">Detailed Results</CardTitle>
                     </CardHeader>
                 </Card>
-            )}
+            )} */}
         </div>
 
     );
-};
+});

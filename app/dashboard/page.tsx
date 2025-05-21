@@ -70,10 +70,10 @@ export default function DashboardPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+          {/* <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
             <LogOut className="h-4 w-4" />
             Logout
-          </Button>
+          </Button> */}
         </div>
 
         <Card className="p-6 shadow-sm">

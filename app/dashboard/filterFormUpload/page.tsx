@@ -26,6 +26,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ResultsViewer } from "@/components/ResultsViewer";
+import { WidthIcon } from "@radix-ui/react-icons";
 
 // Schema for form validation
 const formSchema = z.object({
@@ -53,8 +54,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const serviceOptions = [
-    { value: "Recharge", label: "PaySprint-Recharge" },
-    { value: "Aeps", label: "PaySprint-Aeps" },
+    { value: "RECHARGE", label: "PaySprint-Recharge" },
+    { value: "AEPS", label: "PaySprint-Aeps" },
     { value: "IMT", label: "PaySprint-IMT" },
     { value: "BBPS", label: "BBPS" },
     { value: "Pan_UTI", label: "Pan_UTI", disabled: true },
@@ -78,7 +79,7 @@ const FilterForm = () => {
         defaultValues: {
             fromDate: "",
             toDate: "",
-            serviceName: "default",
+            serviceName: "",
             transactionType: "default",
             file: undefined,
         },
@@ -167,7 +168,7 @@ const FilterForm = () => {
             <Card className="w-full max-w-lg mb-8">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold text-center">
-                        Enter Input Details
+                        Select Inputs Deatils
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -208,37 +209,38 @@ const FilterForm = () => {
                                     />
                                 </div>
                             </div>
-
-                            {/* Service Name */}
-                            <FormField
-                                control={form.control}
-                                name="serviceName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Select Service</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="--Select service--" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {serviceOptions.map((option) => (
-                                                    <SelectItem
-                                                        key={option.value}
-                                                        value={option.value}
-                                                        disabled={option.disabled}
-                                                        className={option.disabled ? "text-red-500" : ""}
-                                                    >
-                                                        {option.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="w-full">
+                                {/* Service Name */}
+                                <FormField
+                                    control={form.control}
+                                    name="serviceName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Select Service</FormLabel>
+                                            <Select value={field.value} onValueChange={field.onChange}>
+                                                <FormControl>
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="--Select service--" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {serviceOptions.map((option) => (
+                                                        <SelectItem
+                                                            key={option.value}
+                                                            value={option.value}
+                                                            disabled={option.disabled}
+                                                            className={option.disabled ? "text-red-500" : ""}
+                                                        >
+                                                            {option.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
                             {/* Transaction Type (only visible for Aeps) */}
                             {selectedService === "Aeps" && (
@@ -248,9 +250,9 @@ const FilterForm = () => {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Transaction Type</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value}>
+                                            <Select onValueChange={field.onChange}>
                                                 <FormControl>
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="w-full">
                                                         <SelectValue placeholder="--Select transaction--" />
                                                     </SelectTrigger>
                                                 </FormControl>

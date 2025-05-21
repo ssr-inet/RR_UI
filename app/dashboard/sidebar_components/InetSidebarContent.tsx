@@ -16,21 +16,21 @@ export default function InetSidebarContent() {
       icon: Home,
     },
     {
-      title: "Filter Form",
+      title: "Auto Reconciliation",
       url: "/dashboard/filterFormUpload",
       icon: Inbox,
     },
 
   ];
 
-  const userItems = [
+  // const userItems = [
 
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: Settings,
-    },
-  ];
+  //   {
+  //     title: "Settings",
+  //     url: "/dashboard/settings",
+  //     icon: Settings,
+  //   },
+  // ];
 
   return (
     <SidebarContent>
@@ -52,7 +52,7 @@ export default function InetSidebarContent() {
         </SidebarGroupContent>
       </SidebarGroup>
       <SidebarRail></SidebarRail>
-      <SidebarGroup>
+      {/* <SidebarGroup>
         <SidebarGroupLabel className="text-primary">User</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -68,7 +68,7 @@ export default function InetSidebarContent() {
             ))}
           </SidebarMenu>
         </SidebarGroupContent>
-      </SidebarGroup>
+      </SidebarGroup> */}
     </SidebarContent>
   );
 }

@@ -128,11 +128,11 @@ const FilterForm = () => {
             console.log("Before axios request");
 
             // Remove the .catch() here and let the try/catch handle it
-            const res = await axios.post("http://localhost:5000/api/dummydata", formData, {
+            const res = await axios.post("http://localhost:5000/api/reconciliation", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
-                timeout: 10000,
+                timeout: 60000,
             });
 
             console.log("After axios request", res);
@@ -147,13 +147,13 @@ const FilterForm = () => {
                     toast.success("Data processed successfully!");
                     setApiResponse(response.data);
                 } else {
-                    const errorMessage = "Error processing file";
+                    let errorMessage = " Error processing file..! Check Inputs and try again..!";
+                    if (response?.data?.message.length > 0) {
+                        errorMessage = response?.data?.message
+                    }
                     toast.error(errorMessage, { duration: 5000 });
                     setApiResponse(null);
                 }
-            } else if (response.status === 202) {
-                toast.warning(response.data?.message || "Processing warning", { duration: 5000 });
-                setApiResponse(null);
             } else {
                 throw new Error(`Unexpected status code: ${response.status}`);
             }
@@ -182,14 +182,14 @@ const FilterForm = () => {
                 });
 
                 if (error.code === "ERR_NETWORK") {
-                    toast.error("Network Error: Could not connect to server..!", {
+                    toast.error("Network Error: Could not connect to server. Check your Internet connection and try again..!", {
                         duration: 15000,
                         position: 'top-center'
                     });
                 }
                 else if (error.code === "ECONNABORTED") {
-                    toast.error("Request timed out. Server is taking too long to respond.", {
-                        duration: 10000
+                    toast.error("Request timed out. Server is taking too long to respond..!", {
+                        duration: 100000
                     });
                 }
                 else if (error.response) {

@@ -8,13 +8,30 @@ import { LogOut } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+// Dynamically import the clock with no SSR
+const Clock = dynamic(
+  () => import('react-live-clock'),
+  {
+    ssr: false,
+    loading: () => <span className="text-secondary">--:--:-- --</span>
+  }
+);
 
 export default function InetSidebarNavbar() {
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
 
   const now = new Date();
   const greeting = now.getHours() < 12 ? "Good Morning" : now.getHours() < 18 ? "Good Afternoon" : "Good Evening";
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const handleLogout = async () => {
     try {
       const response = await axios.post("/api/auth/logout");
@@ -26,21 +43,32 @@ export default function InetSidebarNavbar() {
       toast.error("Logout failed");
     }
   };
+
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
+
   return (
     <div className="sticky top-0 z-50 bg-background border-b border-border/40 p-4 flex items-center justify-between">
       <SidebarTrigger />
-      <div className="flex items-center gap-2 text-sm font-medium text-primary">
-        <span>{greeting} 👋</span>
-        <span>{now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-      </div>
-      <div className="flex justify-between gap-2 items-center" >
-        <Button variant="outline" size="icon" onClick={toggleTheme}>
+
+      <div className="flex justify-between gap-2 items-center">
+        <div className="flex mr-3 items-center gap-2 text-sm font-medium">
+          <span className="text-primary">{greeting} 👋</span>
+          {isMounted ? (
+            <Clock
+              format={'hh:mm:ss a'}
+              ticking={true}
+              timezone={'Asia/Kolkata'}
+            />
+          ) : (
+            <span className="text-secondary">--:--:-- --</span>
+          )}
+        </div>
+        <Button className="mr-3" variant="outline" size="icon" onClick={toggleTheme}>
           {theme === "dark" ? <SunIcon /> : <MoonIcon />}
         </Button>
-        <Button variant="destructive" size="icon" onClick={handleLogout}>
+        <Button className="mr-5" variant="destructive" size="icon" onClick={handleLogout}>
           <LogOut />
         </Button>
       </div>

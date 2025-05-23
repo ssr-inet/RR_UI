@@ -56,6 +56,26 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
         return Array.isArray(sectionData) && sectionData.length > 0;
     });
 
+    const orderedColumns = [
+        "CATEGORY",
+        "TENANT_ID",
+        "IHUB_REFERENCE",
+        "REFID",
+        "IHUB_USERNAME",
+        "AMOUNT",
+        "SERVICE_DATE",
+        "VENDOR_DATE",
+        "VENDOR_STATUS",
+        "IHUB_MASTER_STATUS",
+        "IHUB_LEDGER_STATUS",
+        "RECHARGE_STATUS",
+        // "TENANT_LEDGER_STATUS",
+        "TRANSACTION_DEBIT",
+        "COMMISSION_CREDIT",
+        "TRANSACTION_CREDIT",
+        "COMMISSION_REVERSAL"
+    ];
+
     const exportToExcel = (data: DataItem[], fileName: string) => {
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
@@ -69,7 +89,7 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
         activeSections.forEach((section) => {
             const data = otherSections[section.key] || [];
             if (data.length > 0) {
-                const worksheet = XLSX.utils.json_to_sheet(data);
+                const worksheet = XLSX.utils.json_to_sheet(data, { header: orderedColumns });
                 XLSX.utils.book_append_sheet(workbook, worksheet, section.label || section.key);
             }
         });
@@ -80,26 +100,7 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
     };
 
 
-
-
-    const orderedColumns = [
-        "CATEGORY",
-        "IHUB_REFERENCE",
-        "REFID",
-        "IHUB_USERNAME",
-        "AMOUNT",
-        "SERVICE_DATE",
-        "VENDOR_DATE",
-        "VENDOR_STATUS",
-        "IHUB_MASTER_STATUS",
-        "IHUB_LEDGER_STATUS",
-        "RECHARGE_STATUS",
-        // "TENANT_LEDGER_STATUS",
-        "TRANSACTION_CREDIT",
-        "TRANSACTION_DEBIT",
-        "COMMISSION_CREDIT",
-        "COMMISSION_REVERSAL"
-    ];
+    ``
     const formatValue = (value: any) => {
         if (value === null || value === undefined || value === "") return "N/A";
         if (typeof value === "number" && isNaN(value)) return "N/A";

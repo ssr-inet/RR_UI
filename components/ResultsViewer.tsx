@@ -49,12 +49,15 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
         { key: "IHUB_VEND_FAIL", label: "Vendor_Fail - Ihub_Fail" },
         { key: "IHUB_INT_VEND_SUC", label: "Vendor_Suc - Ihub_Ini" },
         { key: "VEND_FAIL_IHUB_INT", label: "Vendor_Fail - Ihub_Ini" },
+        { key: "Tenant_db_ini_not_in_hubdb", label: "TENANT_DB_INI_NOT_IN_HUB" },
     ];
 
     const activeSections = dataSections.filter(section => {
         const sectionData = otherSections[section.key];
         return Array.isArray(sectionData) && sectionData.length > 0;
     });
+    const service_name = localData?.service_name || " "
+    console.log(service_name)
 
     const orderedColumns = [
         "CATEGORY",
@@ -68,7 +71,7 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
         "VENDOR_STATUS",
         "IHUB_MASTER_STATUS",
         "IHUB_LEDGER_STATUS",
-        "RECHARGE_STATUS",
+        `${service_name}_STATUS`,
         // "TENANT_LEDGER_STATUS",
         "TRANSACTION_DEBIT",
         "COMMISSION_CREDIT",

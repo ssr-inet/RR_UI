@@ -34,7 +34,7 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
     const Total_success_count = localData?.data?.Total_Success_count || 0;
     const Total_failed_count = localData?.data?.Total_Failed_count || 0;
     const otherSections = { ...localData.data };
-
+    const message = localData?.data?.message || " "
     const dataSections = [
         { key: "not_in_Portal", label: "Not in Portal" },
         { key: "NOT_IN_PORTAL_VENDOR_SUCC", label: "Vendor_success - Not_In_IhubPortal" },
@@ -150,7 +150,7 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
                 <CardContent>
                     {activeSections.length === 0 ? (
                         <div className="text-center p-4">
-                            <p>No detailed data available in any category.</p>
+                            <p>{message}</p>
                         </div>
                     ) : (
                         <Tabs defaultValue={activeSections[0]?.key || ''} className="w-full">

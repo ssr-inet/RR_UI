@@ -50,6 +50,7 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
         { key: "IHUB_INT_VEND_SUC", label: "Vendor_Suc - Ihub_Ini" },
         { key: "VEND_FAIL_IHUB_INT", label: "Vendor_Fail - Ihub_Ini" },
         { key: "Tenant_db_ini_not_in_hubdb", label: "TENANT_DB_INI_NOT_IN_HUB" },
+        { key: "matched", label: "Matched_Values" }
     ];
 
     const activeSections = dataSections.filter(section => {
@@ -74,8 +75,8 @@ export const ResultsViewer = memo(({ responseData }: ResultsViewerProps) => {
         `${service_name}_STATUS`,
         // "TENANT_LEDGER_STATUS",
         "TRANSACTION_DEBIT",
-        "COMMISSION_CREDIT",
         "TRANSACTION_CREDIT",
+        "COMMISSION_CREDIT",
         "COMMISSION_REVERSAL"
     ];
 
